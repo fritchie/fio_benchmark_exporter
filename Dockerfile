@@ -10,4 +10,6 @@ COPY . .
 RUN go get -d -v ./...
 RUN go install -v ./...
 
+EXPOSE 9996
+
 CMD [ "fio_benchmark_exporter" ]

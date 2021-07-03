@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fio-benchmark-exporter
+spec:
+  selector:
+    matchLabels:
+      app: fio-benchmark-exporter
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: fio-benchmark-exporter
+    spec:
+      containers:
+      - name: fio-benchmark-exporter
+        image: "fritchie/fio_benchmark_exporter"
+        command: ["fio_benchmark_exporter"]
+        args: ["-directory=/mnt/fio-benchmark-exporter"]
+        ports:
+        - containerPort: 9996
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /mnt/fio-benchmark-exporter
+          name: fio-benchmark-exporter-pv
+      volumes:
+      - name: fio-benchmark-exporter-pv
+        persistentVolumeClaim:
+          claimName: fio-benchmark-operator-pvc
