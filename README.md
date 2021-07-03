@@ -159,3 +159,9 @@ will be used with custom benchmarks.
 # HELP fio_write_lat_pct99 Write total latency 99th percentile (usec)
 # TYPE fio_write_lat_pct99 gauge
 ```
+
+## Dashboard
+
+A very basic Grafana dashboard is available.
+
+[https://grafana.com/grafana/dashboards/14677](https://grafana.com/grafana/dashboards/14677)
