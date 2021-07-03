@@ -12,7 +12,7 @@ By default a chosen benchmark job will run periodically with the results being e
 go build .
 ```
 
-A sample Dockerfile and docker-compose.yaml are also provided.
+A sample Dockerfile, docker-compose.yaml, kustomization.yaml and kubernetes manifests are also provided.
 
 ### Running
 
@@ -20,6 +20,12 @@ Running the exporter requires fio and the libaio development packages to be inst
 
 ```
 ./fio_benchmark_exporter <flags>
+```
+
+For a kubernetes deployment edit kustomization.yaml as needed (you will probably need to change the storageClass in resources/pvc.yaml) and apply the resources:
+
+```
+kustomize build | kubectl apply -f -
 ```
 
 #### Usage
