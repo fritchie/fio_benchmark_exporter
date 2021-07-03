@@ -3,7 +3,7 @@ kind: Kustomization
 namespace: default
 
 resources:
-  - resources/deployment.yaml
-  - resources/pvc.yaml
-  - resources/service.yaml
-  - resources/service-monitor.yaml
+- resources/deployment.yaml
+- resources/pvc.yaml
+- resources/service.yaml
+- resources/service-monitor.yaml
