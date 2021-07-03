@@ -10,3 +10,4 @@ spec:
       app: fio-benchmark-exporter
   endpoints:
   - port: metrics
+    path: /metrics
