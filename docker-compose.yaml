@@ -1,0 +1,12 @@
+version: '2.4'
+services:
+  fio_benchmark_exporter:
+    container_name: "fio_benchmark_exporter"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    user: "1000"
+    network_mode: host
+    restart: unless-stopped
+    expose:
+      - "9996"
