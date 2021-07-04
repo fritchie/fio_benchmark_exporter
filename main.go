@@ -12,6 +12,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -24,26 +25,11 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-var cmd string
-var fioBenchmarkFlags string
-
-// defaults
-var (
-	defaultBenchmark            = "latency"
-	defaultDirectory            = "/tmp"
-	defaultFileSize             = "1G"
-	defaultInterval             = 6 * time.Hour
-	defaultPort                 = "9996"
-	defaultRunOnce              = false
-	defaultRunOnceWait          = 1 * time.Hour
-	defaultBenchmarkRuntime     = "60"
-	defaultStatusUpdates        = false
-	defaultStatusUpdateInterval = "30"
-	labels                      = []string{"benchmark"}
-)
+var labels = []string{"benchmark"}
 
 var (
 	promRegistry = prometheus.NewRegistry()
+	// START METRICS
 	fioReadBW    = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "fio_read_bandwidth_kbps",
@@ -310,6 +296,7 @@ var (
 		},
 		labels,
 	)
+	// END METRICS
 )
 
 func init() {
@@ -356,19 +343,22 @@ func init() {
 }
 
 func main() {
-	benchmark := flag.String("benchmark", defaultBenchmark, "iops, latency or throughput")
+	// START FLAGS
+	benchmark := flag.String("benchmark", "latency", "iops, latency or throughput")
 	customFioBenchmarkFlags := flag.String("customFioBenchmarkFlags", "", "experts only")
-	directory := flag.String("directory", defaultDirectory, "absolute path to directory to use for benchmark files")
-	duration := flag.Duration("interval", defaultInterval, "interval for consecutive benchmark runs")
-	fileSize := flag.String("fileSize", defaultFileSize, "size of file to use for benchmark")
-	port := flag.String("port", defaultPort, "tcp listen port")
-	runOnce := flag.Bool("runOnce", defaultRunOnce, "exit after benchmark complete and runOnceWait has expired")
-	runOnceWait := flag.Duration("runOnceWait", defaultRunOnceWait, "wait this duration before exiting a runOnce benchmark")
-	benchmarkRuntime := flag.String("benchmarkRuntime", defaultBenchmarkRuntime, "runtime for benchmark in seconds")
-	statusUpdates := flag.Bool("statusUpdates", defaultStatusUpdates, "update metrics every statusUpdateTime seconds during benchmark")
-	statusUpdateInterval := flag.String("statusUpdateInterval", defaultStatusUpdateInterval, "metric update interval in seconds when statusUpdates enabled")
+	directory := flag.String("directory", "/tmp", "absolute path to directory to use for benchmark files")
+	duration := flag.Duration("interval", 6 * time.Hour, "interval for consecutive benchmark runs")
+	fileSize := flag.String("fileSize", "1G", "size of file to use for benchmark")
+	port := flag.String("port", "9996", "tcp listen port")
+	runOnce := flag.Bool("runOnce", false, "exit after benchmark complete and runOnceWait has expired")
+	runOnceWait := flag.Duration("runOnceWait", 1 * time.Hour, "wait this duration before exiting a runOnce benchmark")
+	benchmarkRuntime := flag.String("benchmarkRuntime", "60", "runtime for benchmark in seconds")
+	statusUpdates := flag.Bool("statusUpdates", false, "update metrics every statusUpdateTime seconds during benchmark")
+	statusUpdateInterval := flag.String("statusUpdateInterval", "30", "metric update interval in seconds when statusUpdates enabled")
 	flag.Parse()
+	// END FLAGS
 
+	var fioBenchmarkFlags string
 	switch *benchmark {
 	case "iops":
 		fioBenchmarkFlags = "--name=iops --numjobs=4 --ioengine=libaio --direct=1 --bs=4k --iodepth=128 --readwrite=randrw"
@@ -384,18 +374,18 @@ func main() {
 
 	// make sure custom fio flags supplied for custom benchmark
 	if *benchmark == "custom" && *customFioBenchmarkFlags == "" {
-		log.Fatal("customFioBenchmarkFlags must be used when benchmark is custom. Exiting.")
+		log.Fatal("customFioBenchmarkFlags must be used when benchmark is custom")
 	}
 
 	// fio terse version 5 output used for all benchmarks
 	// custom benchmarks cannot use the --output-format or --output flags
 	if *benchmark == "custom" && strings.Contains(*customFioBenchmarkFlags, "output") {
-		log.Fatal("customFioBenchmarkFlags cannot contain the flag --output-format or --output. Exiting.")
+		log.Fatal("customFioBenchmarkFlags cannot contain the flag --output-format or --output")
 	}
 
 	// make sure custom benchmark does not include any percentile related flags
 	if *benchmark == "custom" && strings.Contains(*customFioBenchmarkFlags, "percentile") {
-		log.Fatal("customFioBenchmarkFlags cannot contain any percentile related flags. Exiting.")
+		log.Fatal("customFioBenchmarkFlags cannot contain any percentile related flags")
 	}
 
 	if !*runOnce {
@@ -409,6 +399,7 @@ func main() {
 			<-ch
 			time.AfterFunc(*duration, func() { ch <- struct{}{} })
 
+			var cmd string
 			if *benchmark != "custom" {
 				if !*statusUpdates {
 					cmd = fmt.Sprintf("fio %s --directory=%s --size=%s --runtime=%s --time_based --output-format=terse --terse-version=5 --lat_percentiles=1 --clat_percentiles=0 --group_reporting", fioBenchmarkFlags, *directory, *fileSize, *benchmarkRuntime)
@@ -426,6 +417,14 @@ func main() {
 			if err != nil {
 				log.Fatalf("Error creating StdoutPipe: %s", err)
 			}
+			fioStderr, err := fioCommand.StderrPipe()
+			if err != nil {
+				log.Fatalf("Error creating StderrPipe: %s", err)
+			}
+			var fioStderrBytes []byte
+			go func() {
+				fioStderrBytes, _ = io.ReadAll(fioStderr)
+			}()
 			if err := fioCommand.Start(); err != nil {
 				log.Fatalf("Error starting fioCommand: %s", err)
 			}
@@ -443,6 +442,7 @@ func main() {
 				log.Printf("Fio update: %s\n", parts)
 				fioBenchmarkSuccess.WithLabelValues(*benchmark).Set(1)
 
+				// START PARSE
 				readBW, err := strconv.ParseFloat(parts[6], 64)
 				if err != nil {
 					log.Printf("Error parsing readBW (parts[6]): %s\n", err)
@@ -736,11 +736,12 @@ func main() {
 				} else {
 					fioIODepth64.WithLabelValues(*benchmark).Set(ioDepth64)
 				}
+				// END PARSE
 			}
 			if err := fioCommand.Wait(); err != nil {
-				log.Fatalf("Fio command error: %s\n", err)
+				log.Fatalf("Fio command error: %s\n%s\n", err, fioStderrBytes)
 			}
-			log.Println("Benchmark complete.")
+			log.Println("Benchmark complete")
 			if *runOnce {
 				log.Printf("Waiting for runOnceWait of %s to expire", runOnceWait)
 				time.Sleep(*runOnceWait)
