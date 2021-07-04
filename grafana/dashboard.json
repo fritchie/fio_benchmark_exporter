@@ -348,6 +348,7 @@
       },
       "yaxes": [
         {
+          "$$hashKey": "object:65",
           "decimals": 1,
           "format": "kbytes",
           "label": "",
@@ -357,6 +358,7 @@
           "show": true
         },
         {
+          "$$hashKey": "object:66",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -395,7 +397,7 @@
     ]
   },
   "timezone": "",
-  "title": "FIO Benchmark Exporter",
+  "title": "Fio Benchmark Exporter",
   "uid": "QRLYgbz7k",
-  "version": 32
+  "version": 35
 }

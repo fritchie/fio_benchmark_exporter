@@ -243,42 +243,42 @@ var (
 	fioIODepth1 = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "fio_iodepth_1",
-			Help: "Queue depth 1 up to but not including 2 (%)",
+			Help: "Queue depth <=1 (%)",
 		},
 		labels,
 	)
 	fioIODepth2 = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "fio_iodepth_2",
-			Help: "Queue depth 2 up to but not including 4 (%)",
+			Help: "Queue depth 2 (%)",
 		},
 		labels,
 	)
 	fioIODepth4 = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "fio_iodepth_4",
-			Help: "Queue depth 4 up to but not including 8 (%)",
+			Help: "Queue depth 4 (%)",
 		},
 		labels,
 	)
 	fioIODepth8 = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "fio_iodepth_8",
-			Help: "Queue depth 8 up to but not including 16 (%)",
+			Help: "Queue depth 8 (%)",
 		},
 		labels,
 	)
 	fioIODepth16 = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "fio_iodepth_16",
-			Help: "Queue depth 16 up to but not including 32 (%)",
+			Help: "Queue depth 16 (%)",
 		},
 		labels,
 	)
 	fioIODepth32 = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "fio_iodepth_32",
-			Help: "Queue depth 32 up to but not including 64 (%)",
+			Help: "Queue depth 32 (%)",
 		},
 		labels,
 	)

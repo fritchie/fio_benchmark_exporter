@@ -26,4 +26,4 @@ spec:
       volumes:
       - name: fio-benchmark-exporter-pv
         persistentVolumeClaim:
-          claimName: fio-benchmark-operator-pvc
+          claimName: fio-benchmark-exporter-pvc
