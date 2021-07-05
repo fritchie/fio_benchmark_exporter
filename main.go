@@ -739,7 +739,7 @@ func main() {
 				// END PARSE
 			}
 			if err := fioCommand.Wait(); err != nil {
-				log.Fatalf("Fio command error: %s\n%s\n", err, fioStderrBytes)
+				log.Fatalf("Fio command error: %s - %s\n", err, fioStderrBytes)
 			}
 			log.Println("Benchmark complete")
 			if *runOnce {
