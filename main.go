@@ -739,7 +739,13 @@ func main() {
 				// END PARSE
 			}
 			if err := fioCommand.Wait(); err != nil {
-				log.Fatalf("Fio command error: %s - %s\n", err, fioStderrBytes)
+				log.Printf("Fio command error: %s\n", err)
+				for _, m := range strings.Split(string(fioStderrBytes), "\n") {
+					if len(m) > 0 {
+						log.Println(m)
+					}
+				}
+				os.Exit(1)
 			}
 			log.Println("Benchmark complete")
 			if *runOnce {
