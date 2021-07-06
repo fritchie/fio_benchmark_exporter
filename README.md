@@ -77,7 +77,7 @@ The flags
 
 will be used with custom benchmarks.
 
-**Don't use the --output-format flag or any percentile related flags in customFioBenchmarkFlags. Additionally, don't specify a job file. Any flag that produces additional fio output may lead to metric parsing errors and incorrect reporting.**
+Don't use the --output-format flag or any percentile related flags in customFioBenchmarkFlags. Additionally, don't specify a job file. Any flag that produces additional fio output may lead to metric parsing errors and incorrect reporting.
 
 ## Sample Output
 
