@@ -23,6 +23,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/robfig/cron/v3"
 )
 
 var labels = []string{"benchmark"}
@@ -345,14 +346,15 @@ func init() {
 func main() {
 	// START FLAGS
 	benchmark := flag.String("benchmark", "latency", "iops, latency or throughput")
+	benchmarkRuntime := flag.String("benchmarkRuntime", "60", "runtime for benchmark in seconds")
+	cronSchedule := flag.String("cronSchedule", "0 */6 * * *", "crontab formatted schedule")
 	customFioBenchmarkFlags := flag.String("customFioBenchmarkFlags", "", "experts only")
 	directory := flag.String("directory", "/tmp", "absolute path to directory to use for benchmark files")
-	duration := flag.Duration("interval", 6 * time.Hour, "interval for consecutive benchmark runs")
 	fileSize := flag.String("fileSize", "1G", "size of file to use for benchmark")
 	port := flag.String("port", "9996", "tcp listen port")
 	runOnce := flag.Bool("runOnce", false, "exit after benchmark complete and runOnceWait has expired")
 	runOnceWait := flag.Duration("runOnceWait", 1 * time.Hour, "wait this duration before exiting a runOnce benchmark")
-	benchmarkRuntime := flag.String("benchmarkRuntime", "60", "runtime for benchmark in seconds")
+	skipInitialBenchmark := flag.Bool("skipInitialBenchmark", false, "skip initial benchmark when app first starts")
 	statusUpdates := flag.Bool("statusUpdates", false, "update metrics every statusUpdateTime seconds during benchmark")
 	statusUpdateInterval := flag.String("statusUpdateInterval", "30", "metric update interval in seconds when statusUpdates enabled")
 	flag.Parse()
@@ -388,17 +390,35 @@ func main() {
 		log.Fatal("customFioBenchmarkFlags cannot contain any percentile related flags")
 	}
 
+	// make sure runOnce and skipInitialBenchmark are not both true
+	if *runOnce && *skipInitialBenchmark {
+		log.Fatalln("The runOnce and skipInitialBenchmark flags cannot be used at the same time")
+	}
+
 	if !*runOnce {
-		log.Printf("Configured interval: %v\n", *duration)
+		log.Printf("Configured schedule: %s\n", *cronSchedule)
 	}
 
 	go func() {
 		ch := make(chan struct{}, 1)
-		ch <- struct{}{}
+
+		// create cron if needed
+		if !*runOnce {
+			c := cron.New()
+			_, err := c.AddFunc(*cronSchedule, func() { if len(ch) == 0 { log.Println("Cron sending message to ch"); ch <- struct{}{} }})
+			if err != nil {
+				log.Fatalf("Invalid cronSchedule: %s: %s\n", *cronSchedule, err)
+			}
+			c.Start()
+		}
+
+		if len(ch) == 0 && !*skipInitialBenchmark {
+			// send initial message
+			ch <- struct{}{}
+		}
+
 		for {
 			<-ch
-			time.AfterFunc(*duration, func() { ch <- struct{}{} })
-
 			var cmd string
 			if *benchmark != "custom" {
 				if !*statusUpdates {

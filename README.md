@@ -1,6 +1,6 @@
 # Fio Benchmark Exporter
 
-Prometheus exporter for [fio](https://github.com/axboe/fio) benchmarks. 
+Prometheus exporter for [fio](https://github.com/axboe/fio) benchmarks.
 
 By default a chosen benchmark job will run periodically with the results being exported in Prometheus format.
 
@@ -39,19 +39,22 @@ kustomize build | kubectl apply -f -
 | Name | Description |
 |-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | benchmark                     | Name for a predefined set of fio job flags. Type: String. Default: latency. |
+| benchmarkRuntime              | Benchmark runtime in seconds. Fio --runtime flag. Type: String. Default: 60. |
+| cronSchedule                  | Schedule for consecutive benchmark runs. Type: String. Default: "0 \*/6 \* \* \*" |
 | customFioBenchmarkFlags       | Fio flags for a custom benchmark. Type: String. Experts Only. Fio can be destructive if used improperly. |
 | directory                     | Absolute path to directory for fio benchmark files. Type: String. Default: /tmp. |
 | fileSize                      | Size of file to use for fio benchmark. Fio --size flag. Type: String. Default: 1G. |
-| interval                      | Time to wait in between consecutive benchmark runs. Type: Duration. Default: 6 hours. |
 | port                          | Listen port number. Type: String. Default: 9996. |
 | runOnce                       | Run benchmark once and exit. |
 | runOnceWait                   | Wait this duration before exiting after runOnce benchmark completes. Type: Duration. Default: 1 hour. |
-| benchmarkRuntime              | Benchmark runtime in seconds. Fio --runtime flag. Type: String. Default: 60. |
+| skipInitialBenchmark          | Skip initial benchmark when app first starts. |
 | statusUpdateInterval          | Seconds to wait in between metric updates when the statusUpdates flag is used. Fio --status-interval flag. Type: String. Default: 30. |
 | statusUpdates                 | Update metrics periodically while benchmark is running. |
 
-For Duration flag syntax see: [Golang Duration](https://golang.org/pkg/time/#ParseDuration)
-
+- For cronSchedule flag syntax see: [Cron Expression Format](https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format).
+- Benchmark will always run once when app first starts unless skipInitialBenchmark flag is used.
+- Be sure benchmark cron interval is longer than benchmarkRuntime.
+- For golang duration syntax see: [Golang Duration](https://pkg.go.dev/time#ParseDuration).
 #### Predefined Benchmarks
 
 | Name             | Equivalent fio command when used with all defaults |
