@@ -1,6 +1,6 @@
 # Fio Benchmark Exporter
 
-Prometheus exporter for [fio](https://github.com/axboe/fio) benchmarks.
+Prometheus exporter for [fio](https://github.com/axboe/fio) benchmarks. Fio (Flexible I/O Tester) is a tool for storage performance benchmarking.
 
 By default a chosen benchmark job will run periodically with the results being exported in Prometheus format.
 
@@ -40,8 +40,8 @@ kustomize build | kubectl apply -f -
 |-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------|
 | benchmark                     | Name for a predefined set of fio job flags. Type: String. Default: latency. |
 | benchmarkRuntime              | Benchmark runtime in seconds. Fio --runtime flag. Type: String. Default: 60. |
-| cronSchedule                  | Schedule for consecutive benchmark runs. Type: String. Default: "0 \*/6 \* \* \*" |
-| customFioBenchmarkFlags       | Fio flags for a custom benchmark. Type: String. Experts Only. Fio can be destructive if used improperly. |
+| cronSchedule                  | Schedule for consecutive benchmark runs. Type: String. Default: "0 \*/6 \* \* \*". |
+| customBenchmarkFioFlags       | Fio flags for a custom benchmark. Type: String. Experts Only. Fio can be destructive if used improperly. |
 | directory                     | Absolute path to directory for fio benchmark files. Type: String. Default: /tmp. |
 | fileSize                      | Size of file to use for fio benchmark. Fio --size flag. Type: String. Default: 1G. |
 | port                          | Listen port number. Type: String. Default: 9996. |
@@ -69,7 +69,7 @@ kustomize build | kubectl apply -f -
 For a custom benchmark supply all fio flags as a string.
 
 ```
-./fio_benchmark_exporter -benchmark=custom -customFioBenchmarkFlags="--name=latency --status-interval=30 --numjobs=1 --ioengine=libaio --direct=1 --bs=4k --iodepth=1 --readwrite=randrw --directory=/tmp --size=1G --runtime=60 --time_based --lat_percentiles=1 --clat_percentiles=0 --group_reporting"
+./fio_benchmark_exporter -benchmark=custom -customBenchmarkFioFlags="--name=latency --status-interval=30 --numjobs=1 --ioengine=libaio --direct=1 --bs=4k --iodepth=1 --readwrite=randrw --directory=/tmp --size=1G --runtime=60 --time_based --lat_percentiles=1 --clat_percentiles=0 --group_reporting"
 ```
 
 The flags
@@ -80,7 +80,7 @@ The flags
 
 will be used with custom benchmarks.
 
-Don't use the --output-format flag or any percentile related flags in customFioBenchmarkFlags. Additionally, don't specify a job file. Any flag that produces additional fio output may lead to metric parsing errors and incorrect reporting.
+Don't use the --output-format flag or any percentile related flags in customBenchmarkFioFlags. Additionally, don't specify a job file. Any flag that produces additional fio output may lead to metric parsing errors and incorrect reporting.
 
 ## Sample Output
 

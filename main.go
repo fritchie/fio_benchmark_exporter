@@ -348,7 +348,7 @@ func main() {
 	benchmark := flag.String("benchmark", "latency", "iops, latency or throughput")
 	benchmarkRuntime := flag.String("benchmarkRuntime", "60", "runtime for benchmark in seconds")
 	cronSchedule := flag.String("cronSchedule", "0 */6 * * *", "crontab formatted schedule")
-	customFioBenchmarkFlags := flag.String("customFioBenchmarkFlags", "", "experts only")
+	customBenchmarkFioFlags := flag.String("customBenchmarkFioFlags", "", "experts only")
 	directory := flag.String("directory", "/tmp", "absolute path to directory to use for benchmark files")
 	fileSize := flag.String("fileSize", "1G", "size of file to use for benchmark")
 	port := flag.String("port", "9996", "tcp listen port")
@@ -375,19 +375,19 @@ func main() {
 	}
 
 	// make sure custom fio flags supplied for custom benchmark
-	if *benchmark == "custom" && *customFioBenchmarkFlags == "" {
-		log.Fatal("customFioBenchmarkFlags must be used when benchmark is custom")
+	if *benchmark == "custom" && *customBenchmarkFioFlags == "" {
+		log.Fatal("customBenchmarkFioFlags must be used when benchmark is custom")
 	}
 
 	// fio terse version 5 output used for all benchmarks
 	// custom benchmarks cannot use the --output-format or --output flags
-	if *benchmark == "custom" && strings.Contains(*customFioBenchmarkFlags, "output") {
-		log.Fatal("customFioBenchmarkFlags cannot contain the flag --output-format or --output")
+	if *benchmark == "custom" && strings.Contains(*customBenchmarkFioFlags, "output") {
+		log.Fatal("customBenchmarkFioFlags cannot contain the flag --output-format or --output")
 	}
 
 	// make sure custom benchmark does not include any percentile related flags
-	if *benchmark == "custom" && strings.Contains(*customFioBenchmarkFlags, "percentile") {
-		log.Fatal("customFioBenchmarkFlags cannot contain any percentile related flags")
+	if *benchmark == "custom" && strings.Contains(*customBenchmarkFioFlags, "percentile") {
+		log.Fatal("customBenchmarkFioFlags cannot contain any percentile related flags")
 	}
 
 	// make sure runOnce and skipInitialBenchmark are not both true
@@ -427,7 +427,7 @@ func main() {
 					cmd = fmt.Sprintf("fio %s --status-interval=%s --directory=%s --size=%s --runtime=%s --time_based --output-format=terse --terse-version=5 --lat_percentiles=1 --clat_percentiles=0 --group_reporting", fioBenchmarkFlags, *statusUpdateInterval, *directory, *fileSize, *benchmarkRuntime)
 				}
 			} else {
-				cmd = fmt.Sprintf("fio --output-format=terse --terse-version=5 --lat_percentiles=1 --clat_percentiles=0 --group_reporting %s", *customFioBenchmarkFlags)
+				cmd = fmt.Sprintf("fio --output-format=terse --terse-version=5 --lat_percentiles=1 --clat_percentiles=0 --group_reporting %s", *customBenchmarkFioFlags)
 			}
 
 			log.Printf("Running fio: %s", cmd)
