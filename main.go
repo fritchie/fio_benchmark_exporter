@@ -395,10 +395,6 @@ func main() {
 		log.Fatalln("The runOnce and skipInitialBenchmark flags cannot be used at the same time")
 	}
 
-	if !*runOnce {
-		log.Printf("Configured schedule: %s\n", *cronSchedule)
-	}
-
 	go func() {
 		ch := make(chan struct{}, 1)
 
@@ -409,6 +405,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("Invalid cronSchedule: %s: %s\n", *cronSchedule, err)
 			}
+			log.Printf("Configured schedule: %s\n", *cronSchedule)
 			c.Start()
 		}
 
