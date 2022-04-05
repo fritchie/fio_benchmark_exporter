@@ -31,7 +31,7 @@ var labels = []string{"benchmark"}
 var (
 	promRegistry = prometheus.NewRegistry()
 	// START METRICS
-	fioReadBW    = prometheus.NewGaugeVec(
+	fioReadBW = prometheus.NewGaugeVec(
 		prometheus.GaugeOpts{
 			Name: "fio_read_bandwidth_kbps",
 			Help: "Read bandwidth (KiB/s)",
