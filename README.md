@@ -69,7 +69,7 @@ kustomize build | kubectl apply -f -
 For a custom benchmark supply all fio flags as a string.
 
 ```
-./fio_benchmark_exporter -benchmark=custom -customBenchmarkFioFlags="--name=latency --status-interval=30 --numjobs=1 --ioengine=libaio --direct=1 --bs=4k --iodepth=1 --readwrite=randrw --directory=/tmp --size=1G --runtime=60 --time_based --lat_percentiles=1 --clat_percentiles=0 --group_reporting"
+./fio_benchmark_exporter -benchmark=custom -customBenchmarkFioFlags="--name=latency --status-interval=30 --numjobs=1 --ioengine=libaio --direct=1 --bs=4k --iodepth=1 --readwrite=randrw --directory=/tmp --size=1G --runtime=60 --time_based"
 ```
 
 The flags
